@@ -112,10 +112,10 @@ class MarkeeFileDecorationProvider {
 		const color = colorMap.get(uri.fsPath);
 		if (color) {
 			return {
-				propagate: true,
+				propagate: false,
 				color: new vscode.ThemeColor(color),
 				tooltip: `This file is marked with color ${color}`,
-				badge: 'M' // Optional badge to show next to the file name
+				badge: '■' // Optional badge to show next to the file name
 			};
 		}
 		return null;

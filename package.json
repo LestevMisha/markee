@@ -3,10 +3,11 @@
   "displayName": "markee",
   "description": "Highlights files with different colors for convenience",
   "version": "0.0.1",
-  "author": "Mikhail Lestev",
+  "author": "Misha Lestev",
   "license": "MIT",
+  "publisher": "MishaLestev",
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.60.0"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,7 @@
     "commands": [
       {
         "command": "markee.markeeEdit",
-        "title": "Markee /edit"
+        "title": "markee /edit"
       },
       {
         "command": "markee.markeeColor1",
@@ -84,24 +85,24 @@
         "id": "markee.color1",
         "description": "Color 1 for a marked file",
         "defaults": {
-          "dark": "#7ad108",
-          "light": "#7ad108"
+          "dark": "#23ff1e",
+          "light": "#23ff1e"
         }
       },
       {
         "id": "markee.color2",
         "description": "Color 2 for a marked file",
         "defaults": {
-          "dark": "#d1087a",
-          "light": "#d1087a"
+          "dark": "#ff0000",
+          "light": "#ff0000"
         }
       },
       {
         "id": "markee.color3",
         "description": "Color 3 for a marked file",
         "defaults": {
-          "dark": "#087ad1",
-          "light": "#087ad1"
+          "dark": "#ffbc1a",
+          "light": "#ffbc1a"
         }
       },
       {
@@ -488,7 +489,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.94.0",
+    "@types/vscode": "^1.60.0",
     "@types/mocha": "^10.0.8",
     "@types/node": "20.x",
     "eslint": "^9.11.1",
