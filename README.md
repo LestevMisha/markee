@@ -6,7 +6,7 @@
 
 - Mark files with different custom colors (up to 50 customizable colors).
 - Persist file marks across VS Code sessions.
-- Display a badge (`M`) and a tooltip indicating the file is marked.
+- Display a badge (`■`) and a tooltip indicating the file is marked.
 - Quick access to your 3 primary colors in file explorer.
   
 All Show Cases:
