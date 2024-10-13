@@ -32,20 +32,20 @@ Feature 2. Change file's badge
 
 ![Change file's badge](materials/2-change-files-badge.gif)
 
-- Feature 3. Add or remove exlorer items
+Feature 3. Add or remove exlorer items
 > Commands used in the video:
 - `>markee /deleteExplorerItem`
 - `>markee /addExplorerItem`
 
 ![Add or remove exlorer items](materials/3-add-remove-explorer-items.gif)
 
-- Feature 4. Select dropdown colors
+Feature 4. Select dropdown colors
 > Commands used in the video:
 - `>markee /select`
 
 ![Select dropdown colors](materials/4-select-dropdown-colors.gif)
 
-- Feature 5. Change hex colors
+Feature 5. Change hex colors
 > Commands used in the video:
 - `>markee /editColors`
 
