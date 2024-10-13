@@ -2,12 +2,12 @@
   "name": "markee",
   "displayName": "markee",
   "description": "Highlights files with different colors for convenience",
-  "version": "0.0.2",
+  "version": "0.1.7",
   "author": "Misha Lestev",
   "license": "MIT",
   "publisher": "MishaLestev",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.72.0"
   },
   "repository": {
     "type": "git",
@@ -25,457 +25,533 @@
   ],
   "main": "./extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "markee settings",
+      "properties": {
+        "markee.explorer.commands.hidden": {
+          "type": "array",
+          "default": [],
+          "description": "List of colors to hide in the explorer context menu"
+        },
+        "markee.badge": {
+          "type": "string",
+          "default": "●",
+          "description": "Global markee badge icon for file's marking"
+        }
+      }
+    },
     "commands": [
       {
-        "command": "markee.markeeEdit",
-        "title": "markee /edit"
+        "command": "markee.explorer.commands.markcolor1",
+        "title": "markee /markcolor1"
       },
       {
-        "command": "markee.markeeColor1",
-        "title": "markee /color1"
+        "command": "markee.explorer.commands.markcolor2",
+        "title": "markee /markcolor2"
       },
       {
-        "command": "markee.markeeColor2",
-        "title": "markee /color2"
+        "command": "markee.explorer.commands.markcolor3",
+        "title": "markee /markcolor3"
       },
       {
-        "command": "markee.markeeColor3",
-        "title": "markee /color3"
+        "command": "markee.explorer.commands.markcolor4",
+        "title": "markee /markcolor4"
       },
       {
-        "command": "markee.markeeSelect",
+        "command": "markee.explorer.commands.markcolor5",
+        "title": "markee /markcolor5"
+      },
+      {
+        "command": "markee.explorer.commands.unmark",
+        "title": "markee /unmark"
+      },
+      {
+        "command": "markee.explorer.commands.select",
         "title": "markee /select"
       },
       {
-        "command": "markee.markeeRemove",
-        "title": "markee /remove"
+        "command": "markee.commands.editColors",
+        "title": "markee /editColors"
+      },
+      {
+        "command": "markee.commands.deleteExplorerItem",
+        "title": "markee /deleteExplorerItem"
+      },
+      {
+        "command": "markee.commands.addExplorerItem",
+        "title": "markee /addExplorerItem"
+      },
+      {
+        "command": "markee.commands.changeBadge",
+        "title": "markee /changeBadge"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "markee.markeeRemove",
-          "when": "resourceLangId",
+          "command": "markee.explorer.commands.markcolor1",
+          "when": "resourceLangId && markee.when.markcolor1",
           "group": "navigation"
         },
         {
-          "command": "markee.markeeSelect",
-          "when": "resourceLangId",
+          "command": "markee.explorer.commands.markcolor2",
+          "when": "resourceLangId && markee.when.markcolor2",
           "group": "navigation"
         },
         {
-          "command": "markee.markeeColor1",
-          "when": "resourceLangId",
+          "command": "markee.explorer.commands.markcolor3",
+          "when": "resourceLangId && markee.when.markcolor3",
           "group": "navigation"
         },
         {
-          "command": "markee.markeeColor2",
-          "when": "resourceLangId",
+          "command": "markee.explorer.commands.markcolor4",
+          "when": "resourceLangId && markee.when.markcolor4",
           "group": "navigation"
         },
         {
-          "command": "markee.markeeColor3",
-          "when": "resourceLangId",
+          "command": "markee.explorer.commands.markcolor5",
+          "when": "resourceLangId && markee.when.markcolor5",
           "group": "navigation"
+        },
+        {
+          "command": "markee.explorer.commands.unmark",
+          "when": "resourceLangId && markee.when.unmark",
+          "group": "navigation"
+        },
+        {
+          "command": "markee.explorer.commands.select",
+          "when": "resourceLangId && markee.when.select",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "markee.explorer.commands.markcolor1",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.markcolor2",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.markcolor3",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.markcolor4",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.markcolor5",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.unmark",
+          "when": "false"
+        },
+        {
+          "command": "markee.explorer.commands.select",
+          "when": "false"
         }
       ]
     },
     "colors": [
       {
-        "id": "markee.color1",
-        "description": "Color 1 for a marked file",
+        "id": "markee.colors.color1",
+        "description": "color1",
         "defaults": {
-          "dark": "#23ff1e",
-          "light": "#23ff1e"
+          "light": "#23ff1e",
+          "dark": "#23ff1e"
         }
       },
       {
-        "id": "markee.color2",
-        "description": "Color 2 for a marked file",
+        "id": "markee.colors.color2",
+        "description": "color2",
         "defaults": {
-          "dark": "#ff0000",
-          "light": "#ff0000"
+          "light": "#ff0000",
+          "dark": "#ff0000"
         }
       },
       {
-        "id": "markee.color3",
-        "description": "Color 3 for a marked file",
+        "id": "markee.colors.color3",
+        "description": "color3",
         "defaults": {
-          "dark": "#ffbc1a",
-          "light": "#ffbc1a"
+          "light": "#ffbc1a",
+          "dark": "#ffbc1a"
         }
       },
       {
-        "id": "markee.color4",
-        "description": "Color 4 for a marked file",
+        "id": "markee.colors.color4",
+        "description": "color4",
         "defaults": {
           "dark": "#d1d108",
           "light": "#d1d108"
         }
       },
       {
-        "id": "markee.color5",
-        "description": "Color 5 for a marked file",
+        "id": "markee.colors.color5",
+        "description": "color5",
         "defaults": {
           "dark": "#7a087a",
           "light": "#7a087a"
         }
       },
       {
-        "id": "markee.color6",
-        "description": "Color 6 for a marked file",
+        "id": "markee.colors.color6",
+        "description": "color6",
         "defaults": {
           "dark": "#087a7a",
           "light": "#087a7a"
         }
       },
       {
-        "id": "markee.color7",
-        "description": "Color 7 for a marked file",
+        "id": "markee.colors.color7",
+        "description": "color7",
         "defaults": {
           "dark": "#fca311",
           "light": "#fca311"
         }
       },
       {
-        "id": "markee.color8",
-        "description": "Color 8 for a marked file",
+        "id": "markee.colors.color8",
+        "description": "color8",
         "defaults": {
           "dark": "#14213d",
           "light": "#14213d"
         }
       },
       {
-        "id": "markee.color9",
-        "description": "Color 9 for a marked file",
+        "id": "markee.colors.color9",
+        "description": "color9",
         "defaults": {
           "dark": "#0077b6",
           "light": "#0077b6"
         }
       },
       {
-        "id": "markee.color10",
-        "description": "Color 10 for a marked file",
+        "id": "markee.colors.color10",
+        "description": "color10",
         "defaults": {
           "dark": "#90be6d",
           "light": "#90be6d"
         }
       },
       {
-        "id": "markee.color11",
-        "description": "Color 11 for a marked file",
+        "id": "markee.colors.color11",
+        "description": "color11",
         "defaults": {
           "dark": "#ff006e",
           "light": "#ff006e"
         }
       },
       {
-        "id": "markee.color12",
-        "description": "Color 12 for a marked file",
+        "id": "markee.colors.color12",
+        "description": "color12",
         "defaults": {
           "dark": "#8338ec",
           "light": "#8338ec"
         }
       },
       {
-        "id": "markee.color13",
-        "description": "Color 13 for a marked file",
+        "id": "markee.colors.color13",
+        "description": "color13",
         "defaults": {
           "dark": "#f77f00",
           "light": "#f77f00"
         }
       },
       {
-        "id": "markee.color14",
-        "description": "Color 14 for a marked file",
+        "id": "markee.colors.color14",
+        "description": "color14",
         "defaults": {
           "dark": "#b5179e",
           "light": "#b5179e"
         }
       },
       {
-        "id": "markee.color15",
-        "description": "Color 15 for a marked file",
+        "id": "markee.colors.color15",
+        "description": "color15",
         "defaults": {
           "dark": "#48cae4",
           "light": "#48cae4"
         }
       },
       {
-        "id": "markee.color16",
-        "description": "Color 16 for a marked file",
+        "id": "markee.colors.color16",
+        "description": "color16",
         "defaults": {
           "dark": "#9d0208",
           "light": "#9d0208"
         }
       },
       {
-        "id": "markee.color17",
-        "description": "Color 17 for a marked file",
+        "id": "markee.colors.color17",
+        "description": "color17",
         "defaults": {
           "dark": "#4cc9f0",
           "light": "#4cc9f0"
         }
       },
       {
-        "id": "markee.color18",
-        "description": "Color 18 for a marked file",
+        "id": "markee.colors.color18",
+        "description": "color18",
         "defaults": {
           "dark": "#ee6c4d",
           "light": "#ee6c4d"
         }
       },
       {
-        "id": "markee.color19",
-        "description": "Color 19 for a marked file",
+        "id": "markee.colors.color19",
+        "description": "color19",
         "defaults": {
           "dark": "#94d2bd",
           "light": "#94d2bd"
         }
       },
       {
-        "id": "markee.color20",
-        "description": "Color 20 for a marked file",
+        "id": "markee.colors.color20",
+        "description": "color20",
         "defaults": {
           "dark": "#ffbf69",
           "light": "#ffbf69"
         }
       },
       {
-        "id": "markee.color21",
-        "description": "Color 21 for a marked file",
+        "id": "markee.colors.color21",
+        "description": "color21",
         "defaults": {
           "dark": "#6d597a",
           "light": "#6d597a"
         }
       },
       {
-        "id": "markee.color22",
-        "description": "Color 22 for a marked file",
+        "id": "markee.colors.color22",
+        "description": "color22",
         "defaults": {
           "dark": "#ccff33",
           "light": "#ccff33"
         }
       },
       {
-        "id": "markee.color23",
-        "description": "Color 23 for a marked file",
+        "id": "markee.colors.color23",
+        "description": "color23",
         "defaults": {
           "dark": "#1e6091",
           "light": "#1e6091"
         }
       },
       {
-        "id": "markee.color24",
-        "description": "Color 24 for a marked file",
+        "id": "markee.colors.color24",
+        "description": "color24",
         "defaults": {
           "dark": "#003566",
           "light": "#003566"
         }
       },
       {
-        "id": "markee.color25",
-        "description": "Color 25 for a marked file",
+        "id": "markee.colors.color25",
+        "description": "color25",
         "defaults": {
           "dark": "#74c69d",
           "light": "#74c69d"
         }
       },
       {
-        "id": "markee.color26",
-        "description": "Color 26 for a marked file",
+        "id": "markee.colors.color26",
+        "description": "color26",
         "defaults": {
           "dark": "#606c38",
           "light": "#606c38"
         }
       },
       {
-        "id": "markee.color27",
-        "description": "Color 27 for a marked file",
+        "id": "markee.colors.color27",
+        "description": "color27",
         "defaults": {
           "dark": "#f4a261",
           "light": "#f4a261"
         }
       },
       {
-        "id": "markee.color28",
-        "description": "Color 28 for a marked file",
+        "id": "markee.colors.color28",
+        "description": "color28",
         "defaults": {
           "dark": "#e9d8a6",
           "light": "#e9d8a6"
         }
       },
       {
-        "id": "markee.color29",
-        "description": "Color 29 for a marked file",
+        "id": "markee.colors.color29",
+        "description": "color29",
         "defaults": {
           "dark": "#dd1c1a",
           "light": "#dd1c1a"
         }
       },
       {
-        "id": "markee.color30",
-        "description": "Color 30 for a marked file",
+        "id": "markee.colors.color30",
+        "description": "color30",
         "defaults": {
           "dark": "#0077b6",
           "light": "#0077b6"
         }
       },
       {
-        "id": "markee.color31",
-        "description": "Color 31 for a marked file",
+        "id": "markee.colors.color31",
+        "description": "color31",
         "defaults": {
           "dark": "#264653",
           "light": "#264653"
         }
       },
       {
-        "id": "markee.color32",
-        "description": "Color 32 for a marked file",
+        "id": "markee.colors.color32",
+        "description": "color32",
         "defaults": {
           "dark": "#ffadad",
           "light": "#ffadad"
         }
       },
       {
-        "id": "markee.color33",
-        "description": "Color 33 for a marked file",
+        "id": "markee.colors.color33",
+        "description": "color33",
         "defaults": {
           "dark": "#ffcad4",
           "light": "#ffcad4"
         }
       },
       {
-        "id": "markee.color34",
-        "description": "Color 34 for a marked file",
+        "id": "markee.colors.color34",
+        "description": "color34",
         "defaults": {
           "dark": "#b5838d",
           "light": "#b5838d"
         }
       },
       {
-        "id": "markee.color35",
-        "description": "Color 35 for a marked file",
+        "id": "markee.colors.color35",
+        "description": "color35",
         "defaults": {
           "dark": "#e5989b",
           "light": "#e5989b"
         }
       },
       {
-        "id": "markee.color36",
-        "description": "Color 36 for a marked file",
+        "id": "markee.colors.color36",
+        "description": "color36",
         "defaults": {
           "dark": "#8d99ae",
           "light": "#8d99ae"
         }
       },
       {
-        "id": "markee.color37",
-        "description": "Color 37 for a marked file",
+        "id": "markee.colors.color37",
+        "description": "color37",
         "defaults": {
           "dark": "#001427",
           "light": "#001427"
         }
       },
       {
-        "id": "markee.color38",
-        "description": "Color 38 for a marked file",
+        "id": "markee.colors.color38",
+        "description": "color38",
         "defaults": {
           "dark": "#023e8a",
           "light": "#023e8a"
         }
       },
       {
-        "id": "markee.color39",
-        "description": "Color 39 for a marked file",
+        "id": "markee.colors.color39",
+        "description": "color39",
         "defaults": {
           "dark": "#e76f51",
           "light": "#e76f51"
         }
       },
       {
-        "id": "markee.color40",
-        "description": "Color 40 for a marked file",
+        "id": "markee.colors.color40",
+        "description": "color40",
         "defaults": {
           "dark": "#2a9d8f",
           "light": "#2a9d8f"
         }
       },
       {
-        "id": "markee.color41",
-        "description": "Color 41 for a marked file",
+        "id": "markee.colors.color41",
+        "description": "color41",
         "defaults": {
           "dark": "#9b2226",
           "light": "#9b2226"
         }
       },
       {
-        "id": "markee.color42",
-        "description": "Color 42 for a marked file",
+        "id": "markee.colors.color42",
+        "description": "color42",
         "defaults": {
           "dark": "#bb3e03",
           "light": "#bb3e03"
         }
       },
       {
-        "id": "markee.color43",
-        "description": "Color 43 for a marked file",
+        "id": "markee.colors.color43",
+        "description": "color43",
         "defaults": {
           "dark": "#cb997e",
           "light": "#cb997e"
         }
       },
       {
-        "id": "markee.color44",
-        "description": "Color 44 for a marked file",
+        "id": "markee.colors.color44",
+        "description": "color44",
         "defaults": {
           "dark": "#6d6875",
           "light": "#6d6875"
         }
       },
       {
-        "id": "markee.color45",
-        "description": "Color 45 for a marked file",
+        "id": "markee.colors.color45",
+        "description": "color45",
         "defaults": {
           "dark": "#3a0ca3",
           "light": "#3a0ca3"
         }
       },
       {
-        "id": "markee.color46",
-        "description": "Color 46 for a marked file",
+        "id": "markee.colors.color46",
+        "description": "color46",
         "defaults": {
           "dark": "#0a9396",
           "light": "#0a9396"
         }
       },
       {
-        "id": "markee.color47",
-        "description": "Color 47 for a marked file",
+        "id": "markee.colors.color47",
+        "description": "color47",
         "defaults": {
           "dark": "#004b23",
           "light": "#004b23"
         }
       },
       {
-        "id": "markee.color48",
-        "description": "Color 48 for a marked file",
+        "id": "markee.colors.color48",
+        "description": "color48",
         "defaults": {
           "dark": "#ff4d6d",
           "light": "#ff4d6d"
         }
       },
       {
-        "id": "markee.color49",
-        "description": "Color 49 for a marked file",
+        "id": "markee.colors.color49",
+        "description": "color49",
         "defaults": {
           "dark": "#c77dff",
           "light": "#c77dff"
         }
       },
       {
-        "id": "markee.color50",
-        "description": "Color 50 for a marked file",
+        "id": "markee.colors.color50",
+        "description": "color50",
         "defaults": {
           "dark": "#00b4d8",
           "light": "#00b4d8"
@@ -489,11 +565,11 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.60.0",
     "@types/mocha": "^10.0.8",
     "@types/node": "20.x",
-    "eslint": "^9.11.1",
+    "@types/vscode": "^1.72.0",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.11.1"
   }
 }

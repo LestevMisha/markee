@@ -1,191 +1,303 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-
-let colorMap = new Map();
+const markedFiles = new Map();
 let decorationProvider = null;
+let colorsObj = null;
 
 /**
  * @param {vscode.ExtensionContext} context
  */
-function activate(context) {
+async function activate(context) {
 
-	console.log('Extension "markee" is now active.');
+    // Preload colors.json file for select menu
+    try {
+        const filePath = path.join(__dirname, "colors.json");
+        const fileContent = await fs.promises.readFile(filePath, 'utf8');
+        colorsObj = JSON.parse(fileContent);
+        console.log('Markee: Colors configuration loaded successfully.');
+    } catch (error) {
+        console.error('Markee: Failed to load colors.json:', error);
+        vscode.window.showErrorMessage('Markee: Failed to load colors configuration.');
+        throw error;
+    }
 
-	// Register the FileDecorationProvider only once
-	decorationProvider = new MarkeeFileDecorationProvider();
-	vscode.window.registerFileDecorationProvider(decorationProvider);
+    // Register decoration provider
+    decorationProvider = new DecorationProvider();
+    context.subscriptions.push(
+        vscode.window.registerFileDecorationProvider(decorationProvider),
+    );
 
-	// Load stored colors from the global storage
-	loadStoredColors(context);
+    // Restore Global Markees (marked files)
+    restoreMarkedColorFromStorage(context);
 
-	// Helper function to show dropdown
-	async function displayOptions($placeholder) {
-		const colorKeys = await getColorCustomizationsKeys("colors.json");
 
-		if (!colorKeys || colorKeys.length === 0) {
-			vscode.window.showErrorMessage("No color keys found.");
-			return;
-		}
+    /* -------------- Register Color Commands -------------- */
+    const commandsConfig = [
+        { command: 'markee.explorer.commands.markcolor1', when: 'markee.when.markcolor1', color: 'markee.colors.color1' },
+        { command: 'markee.explorer.commands.markcolor2', when: 'markee.when.markcolor2', color: 'markee.colors.color2' },
+        { command: 'markee.explorer.commands.markcolor3', when: 'markee.when.markcolor3', color: 'markee.colors.color3' },
+        { command: 'markee.explorer.commands.markcolor4', when: 'markee.when.markcolor4', color: 'markee.colors.color4' },
+        { command: 'markee.explorer.commands.markcolor5', when: 'markee.when.markcolor5', color: 'markee.colors.color5' },
+        { command: 'markee.explorer.commands.unmark', when: 'markee.when.unmark', color: null },
+        { command: 'markee.explorer.commands.select', when: 'markee.when.select', color: null },
+    ];
 
-		const selectedColorKey = await vscode.window.showQuickPick(colorKeys, {
-			placeHolder: $placeholder
-		});
+    commandsConfig.forEach(({ command, when, color }) => {
+        if (color === null) return;
+        context.subscriptions.push(
+            vscode.commands.registerCommand(command, function (uri) {
+                applyMark(context, uri, color);
+            }));
+        contextHandler(command, when);
+    });
 
-		return selectedColorKey;
-	}
 
-	// Register edit command
-	const disposableMarkeeEdit = vscode.commands.registerCommand('markee.markeeEdit', async function (uri) {
-		const selectedColorKey = await displayOptions("Edit specific color");
 
-		// Ask the user to input a hex color
-		const userColor = await vscode.window.showInputBox({
-			prompt: "Enter a hex color (e.g., #ff6347) for this file",
-			placeHolder: "#ff6347",
-			validateInput: (input) => {
-				return /^#[0-9A-F]{6}$/i.test(input) ? null : 'Please enter a valid hex color (e.g., #ff6347)';
-			}
-		});
+    /* -------------- Register Operational Commands -------------- */
+    // Register unmark command
+    const unmarkCommand = 'markee.explorer.commands.unmark';
+    const unmarkCommandWhen = 'markee.when.unmark';
+    contextHandler(unmarkCommand, unmarkCommandWhen);
+    const disposableUnmark = vscode.commands.registerCommand(unmarkCommand, function (uri) {
+        markedFiles.delete(uri.fsPath);
+        deleteMarkedColorFromStorage(context, uri);
+        decorationProvider.refresh(uri);
+    });
+    context.subscriptions.push(disposableUnmark);
 
-		if (userColor) {
-			const config = vscode.workspace.getConfiguration();
-			const currentCustomizations = config.get('workbench.colorCustomizations') || {};
-			currentCustomizations[selectedColorKey] = userColor;
-			await config.update('workbench.colorCustomizations', currentCustomizations, vscode.ConfigurationTarget.Global);
-			return;
-		}
-	});
+    // Register select command
+    const selectCommand = 'markee.explorer.commands.select';
+    const selectCommandWhen = 'markee.when.select';
+    contextHandler(selectCommand, selectCommandWhen);
+    const disposableSelect = vscode.commands.registerCommand(selectCommand, async function (uri) {
+        try {
+            const selectedColorKey = await getSelectedColor("Select color to apply");
+            if (selectedColorKey) {
+                applyMark(context, uri, selectedColorKey);
+            }
+        } catch (error) {
+            console.error('Markee: Failed to select color:', error);
+            vscode.window.showErrorMessage('Markee: Failed to select color.');
+        }
+    });
+    context.subscriptions.push(disposableSelect);
 
-	// Register select command
-	const disposableMarkeeSelect = vscode.commands.registerCommand('markee.markeeSelect', async function (uri) {
-		const selectedColorKey = await displayOptions("Select color to apply");
+    // Register deleteExplorerItem command
+    const disposableDeleteExplorerItem = vscode.commands.registerCommand('markee.commands.deleteExplorerItem', async function (uri) {
+        try {
+            const commandsArray = commandsConfig.map(item => item.command);
+            const availableCommandsArray = commandsArray.filter(command => !getHiddenCommands().includes(command));
+            const selectedCommand = await vscode.window.showQuickPick(availableCommandsArray, {
+                placeHolder: "Select command to delete from explorer"
+            });
+            if (selectedCommand) {
+                const selectedItem = commandsConfig.find(item => item.command === selectedCommand);
+                updateWorkspaceVariable("markee.explorer.commands.hidden", [], null, selectedCommand, "add");
+                vscode.commands.executeCommand('setContext', selectedItem.when, false);
+            }
+        } catch (error) {
+            console.error('Markee: Failed to delete explorer item:', error);
+            vscode.window.showErrorMessage('Markee: Failed to delete explorer item.');
+        }
+    });
+    context.subscriptions.push(disposableDeleteExplorerItem);
 
-		// Store the color in the map for this URI
-		colorMap.set(uri.fsPath, selectedColorKey);
-		saveColorToStorage(context, uri.fsPath, selectedColorKey);
+    // Register addExplorerItem command
+    const disposableAddExplorerItem = vscode.commands.registerCommand('markee.commands.addExplorerItem', async function (uri) {
+        try {
+            const commandsArray = commandsConfig.map(item => item.command);
+            const availableCommandsArray = commandsArray.filter(command => getHiddenCommands().includes(command));
+            const selectedCommand = await vscode.window.showQuickPick(availableCommandsArray, {
+                placeHolder: "Select command to add to explorer"
+            });
+            if (selectedCommand) {
+                const selectedItem = commandsConfig.find(item => item.command === selectedCommand);
+                updateWorkspaceVariable("markee.explorer.commands.hidden", [], null, selectedCommand, "delete");
+                vscode.commands.executeCommand('setContext', selectedItem.when, true);
+            }
+        } catch (error) {
+            console.error('Markee: Failed to add explorer item:', error);
+            vscode.window.showErrorMessage('Markee: Failed to add explorer item.');
+        }
+    });
+    context.subscriptions.push(disposableAddExplorerItem);
 
-		// Trigger the refresh of the FileDecorationProvider
-		decorationProvider.refresh(uri);
-	});
+    // Register changeBadge command
+    const disposableChangeBadge = vscode.commands.registerCommand('markee.commands.changeBadge', async function (uri) {
+        try {
+            const userBadge = await vscode.window.showInputBox({
+                prompt: "Paste or type your emoji or symbol here!",
+                placeHolder: "🔥",
+                validateInput: (input) => {
+                    // Check if input is empty or longer than 2 characters
+                    if (!input) {
+                        return 'Input cannot be empty.';
+                    }
+                    if (input.length > 2) {
+                        return 'Please enter a valid emoji or symbol (maximum 2 characters).';
+                    }
+                    return null; // Input is valid
+                }
+            });
+            if (userBadge) {
+                const config = vscode.workspace.getConfiguration();
+                config.update("markee.badge", userBadge, vscode.ConfigurationTarget.Global);
+                decorationProvider.refreshAll();
+            }
+        } catch (error) {
+            console.error('Markee: Failed to change the badge:', error);
+            vscode.window.showErrorMessage('Markee: Failed to change the badge.');
+        }
+    });
+    context.subscriptions.push(disposableChangeBadge);
 
-	// Register unselect command (return to default)
-	const disposableMarkeeUnselect = vscode.commands.registerCommand('markee.markeeRemove', (uri) => {
-		// Remove the file's color from the map
-		colorMap.delete(uri.fsPath);
-		removeColorFromStorage(context, uri.fsPath);
-		decorationProvider.refresh(uri);
-	});
 
-	// Register the first command
-	const disposableMarkee1 = vscode.commands.registerCommand('markee.markeeColor1', (uri) => {
-		changeColor(context, uri, "markee.color1");
-	});
+    // Register editColors command
+    const disposableEditColors = vscode.commands.registerCommand('markee.commands.editColors', async function (uri) {
+        try {
+            const selectedColorKey = await getSelectedColor("Edit specific color");
 
-	// Register the second command
-	const disposableMarkee2 = vscode.commands.registerCommand('markee.markeeColor2', (uri) => {
-		changeColor(context, uri, "markee.color2");
-	});
+            // Ask the user to input a hex color
+            const userColor = await vscode.window.showInputBox({
+                prompt: "Enter a hex color (e.g., #ff6347) for this file",
+                placeHolder: "#ff6347",
+                validateInput: (input) => {
+                    return /^#[0-9A-F]{6}$/i.test(input) ? null : 'Please enter a valid hex color (e.g., #ff6347)';
+                }
+            });
 
-	// Register the third command
-	const disposableMarkee3 = vscode.commands.registerCommand('markee.markeeColor3', (uri) => {
-		changeColor(context, uri, "markee.color3");
-	});
+            if (userColor) {
+                updateWorkspaceVariable("workbench.colorCustomizations", {}, selectedColorKey, userColor, "add");
+            }
+        } catch (error) {
+            console.error('Markee: Failed to change the color:', error);
+            vscode.window.showErrorMessage('Markee: Failed to change the color.');
+        }
+    });
+    context.subscriptions.push(disposableEditColors);
 
-	context.subscriptions.push(disposableMarkeeEdit);
-	context.subscriptions.push(disposableMarkeeSelect);
-	context.subscriptions.push(disposableMarkee1);
-	context.subscriptions.push(disposableMarkee2);
-	context.subscriptions.push(disposableMarkee3);
+
+    console.log('Markee extension is active.');
 }
 
 
-
-class MarkeeFileDecorationProvider {
-	constructor() {
-		this._onDidChangeFileDecorations = new vscode.EventEmitter();
-		this.onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
-	}
-
-	// This function is called to provide decorations for files
-	provideFileDecoration(uri) {
-		const color = colorMap.get(uri.fsPath);
-		if (color) {
-			return {
-				propagate: false,
-				color: new vscode.ThemeColor(color),
-				tooltip: `This file is marked with color ${color}`,
-				badge: '■' // Optional badge to show next to the file name
-			};
-		}
-		return null;
-	}
-
-	// Method to refresh decorations for a specific URI
-	refresh(uri) {
-		this._onDidChangeFileDecorations.fire(uri);
-	}
+// Function to save marked color to storage
+function saveMarkedColorToStorage(context, uri, colorname) {
+    const markedFilesStorage = context.globalState.get("markedFiles", {});
+    markedFilesStorage[uri.fsPath] = colorname;
+    context.globalState.update("markedFiles", markedFilesStorage);
 }
 
-// This method is called when your extension is deactivated
+// Function to delete marked color from storage
+function deleteMarkedColorFromStorage(context, uri) {
+    const markedFilesStorage = context.globalState.get("markedFiles", {});
+    delete markedFilesStorage[uri.fsPath];
+    context.globalState.update("markedFiles", markedFilesStorage);
+}
+
+// Function to restore marked colors from storage
+function restoreMarkedColorFromStorage(context) {
+    const markedFilesStorage = context.globalState.get("markedFiles", {});
+    for (const [filePath, colorname] of Object.entries(markedFilesStorage)) {
+        markedFiles.set(filePath, colorname);
+        updateWorkspaceVariable("workbench.colorCustomizations", {}, colorname, colorsObj[colorname]);
+        decorationProvider.refresh(vscode.Uri.file(filePath));
+    }
+}
+
+// Function to mark files with the specified color and save to storage
+function applyMark(context, uri, colorname) {
+    markedFiles.set(uri.fsPath, colorname);
+    saveMarkedColorToStorage(context, uri, colorname);
+    decorationProvider.refresh(uri);
+}
+
+// Update workspace variable
+function updateWorkspaceVariable(variableToUpdate, defaultVariableValue, new_key, new_value, action = "add") {
+    const config = vscode.workspace.getConfiguration();
+    let newVariable = config.get(variableToUpdate) || defaultVariableValue;
+
+    if (new_key) {
+        // if Object
+        if (action === "add") {
+            newVariable[new_key] = new_value;
+        } else if (action === "delete") {
+            delete newVariable[new_key];
+        }
+    } else {
+        // if Array
+        if (action === "add") {
+            newVariable.push(new_value);
+        } else if (action === "delete") {
+            newVariable = newVariable.filter(item => item !== new_value);
+        }
+    }
+
+    config.update(variableToUpdate, newVariable, vscode.ConfigurationTarget.Global);
+}
+
+// Get selected dropdown menu
+async function getSelectedColor($placeholder) {
+    const colorKeys = Object.keys(colorsObj);
+    if (!colorKeys || colorKeys.length === 0) {
+        vscode.window.showErrorMessage("No color keys found.");
+        return;
+    }
+    const selectedColorKey = await vscode.window.showQuickPick(colorKeys, {
+        placeHolder: $placeholder
+    });
+    return selectedColorKey;
+}
+
+// Handle explorer visibility
+function contextHandler(command, when) {
+    if (!getHiddenCommands().includes(command)) {
+        vscode.commands.executeCommand('setContext', when, true);
+    } else {
+        vscode.commands.executeCommand('setContext', when, false);
+    }
+}
+
+// get current hidden commands array
+function getHiddenCommands() {
+    const config = vscode.workspace.getConfiguration();
+    return config.get('markee.explorer.commands.hidden', []);
+
+}
+
 function deactivate() { }
 
 module.exports = {
-	activate,
-	deactivate
+    activate,
+    deactivate
 }
 
+class DecorationProvider {
+    constructor() {
+        this._onDidChangeFileDecorations = new vscode.EventEmitter();
+        this.onDidChangeFileDecorations = this._onDidChangeFileDecorations.event;
+    }
 
-/* ----------------— HELPER FUNCS ----------------— */
+    // This function is called to provide decorations for files
+    provideFileDecoration(uri) {
+        if (markedFiles.has(uri.fsPath)) {
+            const colorname = markedFiles.get(uri.fsPath);
+            // set badge
+            const config = vscode.workspace.getConfiguration();
+            const badge = config.get('markee.badge', 'M');
 
-function changeColor(context, uri, color) {
-	colorMap.set(uri.fsPath, color);
-	saveColorToStorage(context, uri.fsPath, color);
-	decorationProvider.refresh(uri);
-}
+            // Set empty label but add a tooltip or subtle badge
+            return new vscode.FileDecoration(badge, colorname, new vscode.ThemeColor(colorname));
+        }
+        return null;
+    }
 
-// This function reads the workbench color customization keys from the JSON file
-async function getColorCustomizationsKeys(filename) {
-	try {
-		const filePath = path.join(__dirname, filename);
-		const fileContent = await fs.promises.readFile(filePath, 'utf8');
-		const colorCustomizations = JSON.parse(fileContent);
-		return Object.keys(colorCustomizations);
-	} catch (error) {
-		console.error('Error reading the workbench color customizations file:', error);
-		return [];
-	}
-}
+    refresh(uri) {
+        this._onDidChangeFileDecorations.fire(uri);
+    }
 
-// Function to load stored colors from global storage
-function loadStoredColors(context) {
-	const storedColors = context.globalState.get('markedFileColors', {});
-	console.log('Loaded colors:', storedColors);
-
-	for (const [filePath, color] of Object.entries(storedColors)) {
-		colorMap.set(filePath, color);
-
-		// Refresh the decoration for the file after loading its color
-		const uri = vscode.Uri.file(filePath);
-		decorationProvider.refresh(uri);
-	}
-}
-
-
-// Function to save a color to global storage
-function saveColorToStorage(context, filePath, color) {
-	const storedColors = context.globalState.get('markedFileColors', {});
-
-	// Update the storage with the new color
-	storedColors[filePath] = color;
-	context.globalState.update('markedFileColors', storedColors);
-}
-
-// Function to remove a color from global storage
-function removeColorFromStorage(context, filePath) {
-	const storedColors = context.globalState.get('markedFileColors', {});
-
-	// Delete the color entry for the file
-	delete storedColors[filePath];
-	context.globalState.update('markedFileColors', storedColors);
+    refreshAll() {
+        this._onDidChangeFileDecorations.fire();
+    }
 }

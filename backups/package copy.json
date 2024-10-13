@@ -1,0 +1,499 @@
+{
+  "name": "markee",
+  "displayName": "markee",
+  "description": "Highlights files with different colors for convenience",
+  "version": "0.0.3",
+  "author": "Misha Lestev",
+  "license": "MIT",
+  "publisher": "MishaLestev",
+  "engines": {
+    "vscode": "^1.72.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LestevMisha/Markee.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LestevMisha/Markee/issues"
+  },
+  "homepage": "https://github.com/LestevMisha/Markee#readme",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "markee.markeeEdit",
+        "title": "markee /edit"
+      },
+      {
+        "command": "markee.markeeColor1",
+        "title": "markee /color1"
+      },
+      {
+        "command": "markee.markeeColor2",
+        "title": "markee /color2"
+      },
+      {
+        "command": "markee.markeeColor3",
+        "title": "markee /color3"
+      },
+      {
+        "command": "markee.markeeSelect",
+        "title": "markee /select"
+      },
+      {
+        "command": "markee.markeeRemove",
+        "title": "markee /remove"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "markee.markeeRemove",
+          "when": "resourceLangId",
+          "group": "navigation"
+        },
+        {
+          "command": "markee.markeeSelect",
+          "when": "resourceLangId",
+          "group": "navigation"
+        },
+        {
+          "command": "markee.markeeColor1",
+          "when": "resourceLangId",
+          "group": "navigation"
+        },
+        {
+          "command": "markee.markeeColor2",
+          "when": "resourceLangId",
+          "group": "navigation"
+        },
+        {
+          "command": "markee.markeeColor3",
+          "when": "resourceLangId",
+          "group": "navigation"
+        }
+      ]
+    },
+    "colors": [
+      {
+        "id": "markee.colors.color1",
+        "description": "color1",
+        "defaults": {
+          "dark": "#23ff1e",
+          "light": "#23ff1e"
+        }
+      },
+      {
+        "id": "markee.colors.color2",
+        "description": "color2",
+        "defaults": {
+          "dark": "#ff0000",
+          "light": "#ff0000"
+        }
+      },
+      {
+        "id": "markee.colors.color3",
+        "description": "color3",
+        "defaults": {
+          "dark": "#ffbc1a",
+          "light": "#ffbc1a"
+        }
+      },
+      {
+        "id": "markee.colors.color4",
+        "description": "color4",
+        "defaults": {
+          "dark": "#d1d108",
+          "light": "#d1d108"
+        }
+      },
+      {
+        "id": "markee.colors.color5",
+        "description": "color5",
+        "defaults": {
+          "dark": "#7a087a",
+          "light": "#7a087a"
+        }
+      },
+      {
+        "id": "markee.colors.color6",
+        "description": "color6",
+        "defaults": {
+          "dark": "#087a7a",
+          "light": "#087a7a"
+        }
+      },
+      {
+        "id": "markee.colors.color7",
+        "description": "color7",
+        "defaults": {
+          "dark": "#fca311",
+          "light": "#fca311"
+        }
+      },
+      {
+        "id": "markee.colors.color8",
+        "description": "color8",
+        "defaults": {
+          "dark": "#14213d",
+          "light": "#14213d"
+        }
+      },
+      {
+        "id": "markee.colors.color9",
+        "description": "color9",
+        "defaults": {
+          "dark": "#0077b6",
+          "light": "#0077b6"
+        }
+      },
+      {
+        "id": "markee.colors.color10",
+        "description": "color10",
+        "defaults": {
+          "dark": "#90be6d",
+          "light": "#90be6d"
+        }
+      },
+      {
+        "id": "markee.colors.color11",
+        "description": "color11",
+        "defaults": {
+          "dark": "#ff006e",
+          "light": "#ff006e"
+        }
+      },
+      {
+        "id": "markee.colors.color12",
+        "description": "color12",
+        "defaults": {
+          "dark": "#8338ec",
+          "light": "#8338ec"
+        }
+      },
+      {
+        "id": "markee.colors.color13",
+        "description": "color13",
+        "defaults": {
+          "dark": "#f77f00",
+          "light": "#f77f00"
+        }
+      },
+      {
+        "id": "markee.colors.color14",
+        "description": "color14",
+        "defaults": {
+          "dark": "#b5179e",
+          "light": "#b5179e"
+        }
+      },
+      {
+        "id": "markee.colors.color15",
+        "description": "color15",
+        "defaults": {
+          "dark": "#48cae4",
+          "light": "#48cae4"
+        }
+      },
+      {
+        "id": "markee.colors.color16",
+        "description": "color16",
+        "defaults": {
+          "dark": "#9d0208",
+          "light": "#9d0208"
+        }
+      },
+      {
+        "id": "markee.colors.color17",
+        "description": "color17",
+        "defaults": {
+          "dark": "#4cc9f0",
+          "light": "#4cc9f0"
+        }
+      },
+      {
+        "id": "markee.colors.color18",
+        "description": "color18",
+        "defaults": {
+          "dark": "#ee6c4d",
+          "light": "#ee6c4d"
+        }
+      },
+      {
+        "id": "markee.colors.color19",
+        "description": "color19",
+        "defaults": {
+          "dark": "#94d2bd",
+          "light": "#94d2bd"
+        }
+      },
+      {
+        "id": "markee.colors.color20",
+        "description": "color20",
+        "defaults": {
+          "dark": "#ffbf69",
+          "light": "#ffbf69"
+        }
+      },
+      {
+        "id": "markee.colors.color21",
+        "description": "color21",
+        "defaults": {
+          "dark": "#6d597a",
+          "light": "#6d597a"
+        }
+      },
+      {
+        "id": "markee.colors.color22",
+        "description": "color22",
+        "defaults": {
+          "dark": "#ccff33",
+          "light": "#ccff33"
+        }
+      },
+      {
+        "id": "markee.colors.color23",
+        "description": "color23",
+        "defaults": {
+          "dark": "#1e6091",
+          "light": "#1e6091"
+        }
+      },
+      {
+        "id": "markee.colors.color24",
+        "description": "color24",
+        "defaults": {
+          "dark": "#003566",
+          "light": "#003566"
+        }
+      },
+      {
+        "id": "markee.colors.color25",
+        "description": "color25",
+        "defaults": {
+          "dark": "#74c69d",
+          "light": "#74c69d"
+        }
+      },
+      {
+        "id": "markee.colors.color26",
+        "description": "color26",
+        "defaults": {
+          "dark": "#606c38",
+          "light": "#606c38"
+        }
+      },
+      {
+        "id": "markee.colors.color27",
+        "description": "color27",
+        "defaults": {
+          "dark": "#f4a261",
+          "light": "#f4a261"
+        }
+      },
+      {
+        "id": "markee.colors.color28",
+        "description": "color28",
+        "defaults": {
+          "dark": "#e9d8a6",
+          "light": "#e9d8a6"
+        }
+      },
+      {
+        "id": "markee.colors.color29",
+        "description": "color29",
+        "defaults": {
+          "dark": "#dd1c1a",
+          "light": "#dd1c1a"
+        }
+      },
+      {
+        "id": "markee.colors.color30",
+        "description": "color30",
+        "defaults": {
+          "dark": "#0077b6",
+          "light": "#0077b6"
+        }
+      },
+      {
+        "id": "markee.colors.color31",
+        "description": "color31",
+        "defaults": {
+          "dark": "#264653",
+          "light": "#264653"
+        }
+      },
+      {
+        "id": "markee.colors.color32",
+        "description": "color32",
+        "defaults": {
+          "dark": "#ffadad",
+          "light": "#ffadad"
+        }
+      },
+      {
+        "id": "markee.colors.color33",
+        "description": "color33",
+        "defaults": {
+          "dark": "#ffcad4",
+          "light": "#ffcad4"
+        }
+      },
+      {
+        "id": "markee.colors.color34",
+        "description": "color34",
+        "defaults": {
+          "dark": "#b5838d",
+          "light": "#b5838d"
+        }
+      },
+      {
+        "id": "markee.colors.color35",
+        "description": "color35",
+        "defaults": {
+          "dark": "#e5989b",
+          "light": "#e5989b"
+        }
+      },
+      {
+        "id": "markee.colors.color36",
+        "description": "color36",
+        "defaults": {
+          "dark": "#8d99ae",
+          "light": "#8d99ae"
+        }
+      },
+      {
+        "id": "markee.colors.color37",
+        "description": "color37",
+        "defaults": {
+          "dark": "#001427",
+          "light": "#001427"
+        }
+      },
+      {
+        "id": "markee.colors.color38",
+        "description": "color38",
+        "defaults": {
+          "dark": "#023e8a",
+          "light": "#023e8a"
+        }
+      },
+      {
+        "id": "markee.colors.color39",
+        "description": "color39",
+        "defaults": {
+          "dark": "#e76f51",
+          "light": "#e76f51"
+        }
+      },
+      {
+        "id": "markee.colors.color40",
+        "description": "color40",
+        "defaults": {
+          "dark": "#2a9d8f",
+          "light": "#2a9d8f"
+        }
+      },
+      {
+        "id": "markee.colors.color41",
+        "description": "color41",
+        "defaults": {
+          "dark": "#9b2226",
+          "light": "#9b2226"
+        }
+      },
+      {
+        "id": "markee.colors.color42",
+        "description": "color42",
+        "defaults": {
+          "dark": "#bb3e03",
+          "light": "#bb3e03"
+        }
+      },
+      {
+        "id": "markee.colors.color43",
+        "description": "color43",
+        "defaults": {
+          "dark": "#cb997e",
+          "light": "#cb997e"
+        }
+      },
+      {
+        "id": "markee.colors.color44",
+        "description": "color44",
+        "defaults": {
+          "dark": "#6d6875",
+          "light": "#6d6875"
+        }
+      },
+      {
+        "id": "markee.colors.color45",
+        "description": "color45",
+        "defaults": {
+          "dark": "#3a0ca3",
+          "light": "#3a0ca3"
+        }
+      },
+      {
+        "id": "markee.colors.color46",
+        "description": "color46",
+        "defaults": {
+          "dark": "#0a9396",
+          "light": "#0a9396"
+        }
+      },
+      {
+        "id": "markee.colors.color47",
+        "description": "color47",
+        "defaults": {
+          "dark": "#004b23",
+          "light": "#004b23"
+        }
+      },
+      {
+        "id": "markee.colors.color48",
+        "description": "color48",
+        "defaults": {
+          "dark": "#ff4d6d",
+          "light": "#ff4d6d"
+        }
+      },
+      {
+        "id": "markee.colors.color49",
+        "description": "color49",
+        "defaults": {
+          "dark": "#c77dff",
+          "light": "#c77dff"
+        }
+      },
+      {
+        "id": "markee.colors.color50",
+        "description": "color50",
+        "defaults": {
+          "dark": "#00b4d8",
+          "light": "#00b4d8"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.8",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.72.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.11.1"
+  }
+}
