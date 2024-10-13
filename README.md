@@ -37,7 +37,7 @@ Feature 2. Change file's badge
 - `>markee /deleteExplorerItem`
 - `>markee /addExplorerItem`
 
-![Add or remove exlorer items](materials/3-add-remove-explorer-items.mov)
+![Add or remove exlorer items](materials/3-add-remove-explorer-items.gif)
 
 - Feature 4. Select dropdown colors
 > Commands used in the video:
