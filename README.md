@@ -12,7 +12,10 @@
 - Persist file marks across sessions using global storage.
 - Display badges and tooltips for marked files.
 - Customizable badge symbols.
-  
+
+> [!WARNING]  
+> After installing the extension, you may see grey colors. Simply reload Visual Studio Code, and it should resolve the issue. For more details, please refer to [here](#contributions-and-complexities).
+
 ### Commands
 
 Feature 1. Mark or unmark files
@@ -81,12 +84,15 @@ There are certain aspects I would love to work on, but they turned out to be ver
 2. **Default Colors for Warnings and Errors**  
    I did not find the way around with the default colors for warnings, errors, etc. These colors take precedence and are displayed regardless of user settings.
 
-3. **FINAL - Custom Settings for Markees**  
+3. **Custom Settings for Markees**  
    If the above issues can be resolved, I propose adding four custom settings for each markee when the command `>markee /editColors` is used:
    - **Priority Parameter**: Add a `priority` field (ranging from 0 to 5).
    - **Propagate Parameter**: Introduce a `propagate` field (true/false) to control color propagation to parent folders.
    - **Custom Badge Selection**: Allow users to choose a custom badge.
    - **Default Color Hex Input**: Retain the default color hex input as it is.
+
+4. **Grey Colors When Installed**  
+   When the extension is installed, you may notice grey colors instead of the usual ones. This is likely due to the extension's load time, though the exact cause of the issue has not yet been determined.
 
 If we can do it, that will be a great good for others!
 > [!NOTE]  

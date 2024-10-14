@@ -66,7 +66,6 @@ async function activate(context) {
                 const newUri = file.newUri;
 
                 // Check if the old file path was marked
-                vscode.window.showInformationMessage(`oldUri.fsPath: ${oldUri.fsPath}, has old: ${markedFiles.has(oldUri.fsPath)}, has new: ${markedFiles.has(newUri.fsPath)}`);
                 if (markedFiles.has(oldUri.fsPath)) {
                     const colorname = markedFiles.get(oldUri.fsPath);
 
