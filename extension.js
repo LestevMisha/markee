@@ -53,6 +53,45 @@ async function activate(context) {
     });
 
 
+    /* -------------- Register File Rename Event -------------- */
+    context.subscriptions.push(
+        vscode.workspace.onDidRenameFiles(async (renameEvent) => {
+            if (renameEvent.files.length === 0) {
+                return;
+            }
+
+            // Iterate over each renamed file
+            for (const file of renameEvent.files) {
+                const oldUri = file.oldUri;
+                const newUri = file.newUri;
+
+                // Check if the old file path was marked
+                vscode.window.showInformationMessage(`oldUri.fsPath: ${oldUri.fsPath}, has old: ${markedFiles.has(oldUri.fsPath)}, has new: ${markedFiles.has(newUri.fsPath)}`);
+                if (markedFiles.has(oldUri.fsPath)) {
+                    const colorname = markedFiles.get(oldUri.fsPath);
+
+                    // Remove the old file path and add the new file path with the same color
+                    markedFiles.delete(oldUri.fsPath);
+                    markedFiles.set(newUri.fsPath, colorname);
+
+                    // Save the updated marked file to storage
+                    saveMarkedColorToStorage(context, newUri, colorname);
+                    deleteMarkedColorFromStorage(context, oldUri);
+                }
+
+                // Refresh decorations for the new file location
+                /* NOTE!:
+                    It would be more efficient to make it inside the if statement,
+                    but because VS Code sometimes caches it even when the statement if false
+                    we want to update it every time to avoid the cached color to appear again
+                    or vice versa.
+                */
+                decorationProvider.refresh(newUri);
+            }
+        })
+    );
+
+
 
     /* -------------- Register Operational Commands -------------- */
     // Register unmark command
@@ -199,17 +238,30 @@ function deleteMarkedColorFromStorage(context, uri) {
 // Function to restore marked colors from storage
 function restoreMarkedColorFromStorage(context) {
     const markedFilesStorage = context.globalState.get("markedFiles", {});
+    const colorCustomizations = vscode.workspace.getConfiguration().get("workbench.colorCustomizations", {});
+
     for (const [filePath, colorname] of Object.entries(markedFilesStorage)) {
-        markedFiles.set(filePath, colorname);
-        updateWorkspaceVariable("workbench.colorCustomizations", {}, colorname, colorsObj[colorname]);
-        decorationProvider.refresh(vscode.Uri.file(filePath));
+        if (colorsObj && colorsObj[colorname]) {
+            markedFiles.set(filePath, colorname);
+            colorCustomizations[colorname] = colorsObj[colorname];
+        }
     }
+
+    vscode.workspace.getConfiguration().update("workbench.colorCustomizations", colorCustomizations, vscode.ConfigurationTarget.Global);
+    decorationProvider.refreshAll();
 }
 
 // Function to mark files with the specified color and save to storage
 function applyMark(context, uri, colorname) {
     markedFiles.set(uri.fsPath, colorname);
     saveMarkedColorToStorage(context, uri, colorname);
+
+    // Disable Git decorations for this file by modifying workspace settings
+    const gitDecorations = vscode.workspace.getConfiguration().get("git.decorations.enabled", true);
+    if (gitDecorations) {
+        updateWorkspaceVariable("git.decorations", {}, "enabled", false, "add");
+    }
+
     decorationProvider.refresh(uri);
 }
 
