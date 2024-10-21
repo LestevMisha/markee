@@ -3,7 +3,7 @@
   "displayName": "markee",
   "description": "Highlights files with different colors for convenience",
   "icon": "materials/logo.png",
-  "version": "0.2.1",
+  "version": "1.2.1",
   "author": "Misha Lestev",
   "license": "MIT",
   "publisher": "MishaLestev",
@@ -39,9 +39,40 @@
           "type": "string",
           "default": "●",
           "description": "Global markee badge icon for file's marking"
+        },
+        "markee.precedenceDelayTime": {
+          "type": "integer",
+          "default": 800,
+          "description": "Global delay for applying the `precedence` param (if set to 0 will have no affect, if set to less then 100 might have no affect)"
         }
       }
     },
+    "keybindings": [
+      {
+        "command": "markee.explorer.commands.markcolor1",
+        "key": "alt+cmd+m",
+        "when": "resourceFilename"
+      },
+      {
+        "command": "markee.explorer.commands.markcolor2",
+        "key": "alt+cmd+n",
+        "when": "resourceFilename"
+      },
+      {
+        "command": "markee.explorer.commands.unmark",
+        "key": "alt+cmd+u",
+        "when": "resourceFilename"
+      },
+      {
+        "command": "markee.explorer.commands.select",
+        "key": "alt+cmd+s",
+        "when": "resourceFilename"
+      },
+      {
+        "command": "markee.commands.editColorSettings",
+        "key": "alt+cmd+t"
+      }
+    ],
     "commands": [
       {
         "command": "markee.explorer.commands.markcolor1",
@@ -72,8 +103,8 @@
         "title": "markee /select"
       },
       {
-        "command": "markee.commands.editColors",
-        "title": "markee /editColors"
+        "command": "markee.commands.editColorSettings",
+        "title": "markee /editColorSettings"
       },
       {
         "command": "markee.commands.deleteExplorerItem",
@@ -84,8 +115,8 @@
         "title": "markee /addExplorerItem"
       },
       {
-        "command": "markee.commands.changeBadge",
-        "title": "markee /changeBadge"
+        "command": "markee.commands.setPrecedenceDelayTime",
+        "title": "markee /setPrecedenceDelayTime"
       }
     ],
     "menus": {
