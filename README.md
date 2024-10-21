@@ -38,21 +38,25 @@ Feature 2. Add or remove exlorer items
 - `>markee /deleteExplorerItem`
 - `>markee /addExplorerItem`
 
-![Add or remove exlorer items](materials/3-add-remove-explorer-items.gif)
+![Add or remove exlorer items](materials/2-add-remove-explorer-items.gif)
 
 Feature 3. Select colornames (dropdown)
 > Commands used in the video:
 - `>markee /select`
 
-![Select dropdown colors](materials/4-select-dropdown-colors.gif)
+![Select dropdown colors](materials/3-select-dropdown-colors.gif)
 
-Feature 4. Change colornames settings
+Feature 4. Change settings (color, badge, propagate, precedence)
 > Commands used in the video:
 - `>markee /editColorSettings`
 
+1. color
 ![Change `color` hex parameter](materials/4-4-change-color-hex-parameter.gif)
+2. badge
 ![Change `badge` parameter](materials/4-5-change-badge-parameter.gif)
+3. propagate
 ![Change `propagate` parameter](materials/4-6-change-propagate-parameter.gif)
+4. precedence
 ![Change `precedence` parameter](materials/4-7-change-precedence-parameter.gif)
 
 Feature 5. Change default precedence delay time
